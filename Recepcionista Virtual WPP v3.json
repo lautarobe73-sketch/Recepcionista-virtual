@@ -1,0 +1,1854 @@
+{
+  "name": "Pablo's Barber - Recepcionista Virtual WPP v3",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ejemploLAUTA",
+        "options": {}
+      },
+      "id": "a1e60616-51a5-4abc-b8ed-52c0b6574885",
+      "name": "Webhook Evolution API",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        3232
+      ],
+      "webhookId": "impulsa-recepcionista",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "condition_1",
+              "leftValue": "={{ $json.body.data.key.remoteJid }}",
+              "rightValue": "@g.us",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c68178be-9084-4180-9f64-47b536fa547a",
+      "name": "Solo Chats Privados",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1424,
+        3232
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "903d219f-4f97-412a-97fa-04f4859bc22b",
+              "leftValue": "={{ $json.body.data.key.fromMe }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "false"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f980ad08-e333-402e-a6dc-1dfa974dfc20",
+      "name": "Filtro fromMe",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1744,
+        3232
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 6
+      },
+      "id": "407b5b21-8d32-4bcb-b148-dd5a8e02e93e",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2000,
+        3232
+      ],
+      "webhookId": "0be89ccd-51e2-4460-b692-8639ce3fa67d"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "cond_text",
+                    "leftValue": "={{ $json.body.data.messageType }}",
+                    "rightValue": "conversation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "texto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "cond_extended",
+                    "leftValue": "={{ $json.body.data.messageType }}",
+                    "rightValue": "extendedTextMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "texto_extendido"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "cond_audio",
+                    "leftValue": "={{ $json.body.data.messageType }}",
+                    "rightValue": "audioMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "0f642315-2de2-47e1-bb80-812272a98dbd",
+      "name": "Tipo de Mensaje",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        2272,
+        3232
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Preparar Datos').item.json.instanceName }}",
+        "remoteJid": "={{ $('Preparar Datos').item.json.remoteJid }}",
+        "messageText": "Por el momento solo puedo procesar mensajes de texto y audios. ¿En qué te puedo ayudar?",
+        "options_message": {}
+      },
+      "id": "a011d245-509d-488d-860c-65a9507edb8e",
+      "name": "Aviso Tipo No Soportado",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        2800,
+        3760
+      ],
+      "credentials": {
+        "evolutionApi": {
+          "id": "JT73vtD3mKsST7MJ",
+          "name": "Evolution account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "chat-api",
+        "operation": "get-media-base64",
+        "instanceName": "={{ $('Webhook Evolution API').item.json.body.instance }}",
+        "messageId": "={{ $('Webhook Evolution API').item.json.body.data.key.id }}"
+      },
+      "id": "296d8041-6316-4a1a-a0a6-2c289d755e03",
+      "name": "Obtener Media Base64",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        2512,
+        2768
+      ],
+      "credentials": {
+        "evolutionApi": {
+          "id": "JT73vtD3mKsST7MJ",
+          "name": "Evolution account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\nconst base64Data = item.json.data.base64;\nif (!base64Data) {\n  throw new Error('No se encontró base64 en data.base64');\n}\nconst mimeType = item.json.data.mimetype || 'audio/ogg; codecs=opus';\nconst fileName = item.json.data.fileName || 'audio.oga';\nconst ext = fileName.split('.').pop() || 'oga';\nreturn [{\n  json: { ...item.json },\n  binary: {\n    data: {\n      data: base64Data,\n      mimeType: mimeType,\n      fileName: fileName,\n      fileExtension: ext\n    }\n  }\n}];"
+      },
+      "id": "e31c96bb-0523-47d6-9de7-9bc5d578675b",
+      "name": "Convertir Audio a Binario",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2880,
+        2752
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {
+          "language": "es"
+        }
+      },
+      "id": "e61f108f-1688-453b-944a-fd8b837d05ce",
+      "name": "Transcribir con Whisper",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        3168,
+        2832
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "Jy2rbzCOAB1kYxGw",
+          "name": "OpenAI account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const webhookData = $('Webhook Evolution API').first().json;\nconst messageType = webhookData.body.data.messageType;\n\nlet userMessage = '';\nlet rawPhone = webhookData.body.data.key.remoteJid.replace('@s.whatsapp.net', '');\nlet phoneNumber = rawPhone.startsWith('598') ? rawPhone : '598' + rawPhone;\nlet pushName = webhookData.body.data.pushName || 'Usuario';\n\nif (messageType === 'conversation') {\n  userMessage = webhookData.body.data.message.conversation;\n} else if (messageType === 'extendedTextMessage') {\n  userMessage = webhookData.body.data.message.extendedTextMessage.text;\n} else if (messageType === 'audioMessage') {\n  try {\n    const transcription = $('Transcribir con Whisper').first();\n    userMessage = transcription.json.text || '[Audio no transcrito]';\n  } catch (e) {\n    userMessage = '[Error al transcribir audio]';\n  }\n}\n\nif (!userMessage || userMessage.trim() === '') {\n  userMessage = '[Mensaje vacío]';\n}\n\nreturn [{\n  json: {\n    chatInput: userMessage,\n    sessionId: phoneNumber,\n    phoneNumber: phoneNumber,\n    // CORR v2: remoteJid completo para uso directo en nodos Evolution API\n    remoteJid: phoneNumber + '@s.whatsapp.net',\n    pushName: pushName,\n    instanceName: webhookData.body.instance,\n    messageType: messageType,\n    canal: 'whatsapp',\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "5acd4ab5-13a6-4a11-b2bc-689570c5b051",
+      "name": "Preparar Datos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2992,
+        3232
+      ]
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.chatInput }}",
+        "guardrails": {
+          "nsfw": {
+            "value": {
+              "threshold": 0.7
+            }
+          }
+        }
+      },
+      "id": "d46ae20d-0c14-4c10-a8ff-8f9d4eb821bc",
+      "name": "Guardrails",
+      "type": "@n8n/n8n-nodes-langchain.guardrails",
+      "typeVersion": 2,
+      "position": [
+        3552,
+        2944
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Preparar Datos').item.json.instanceName }}",
+        "remoteJid": "={{ $('Preparar Datos').item.json.remoteJid }}",
+        "messageText": "Lo siento, no puedo ayudarte con eso.",
+        "options_message": {}
+      },
+      "id": "820b8819-bc55-4790-b0a4-38d755f04bc5",
+      "name": "Rechazar Mensaje NSFW",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        3968,
+        2800
+      ],
+      "credentials": {
+        "evolutionApi": {
+          "id": "JT73vtD3mKsST7MJ",
+          "name": "Evolution account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Preparar Datos').item.json.chatInput }}",
+        "options": {
+          "systemMessage": "=IDENTIDAD Y ROL\nSos Mateo, el asistente virtual de Pablo's Barber. Tu rol es atender a los clientes por WhatsApp: entender qué servicio necesitan y ayudarlos a agendar su turno de forma rápida y sin vueltas.\n\nSos de pocas palabras pero con carisma. Sabés leer a la gente. No sos un bot — sos alguien del equipo. Tus respuestas son cortas, directas y con buena onda. Máximo 3 o 4 líneas. Una pregunta a la vez.\n\nNo usás emojis. Siempre saludás en el primer mensaje, solo en ese. Si alguien pregunta si puede mandar audios, respondé que sí, sin problema.\n\nINFORMACIÓN DE LA BARBERÍA\nNombre: Pablo's Barber\nContacto directo: 59892000000\nEmail: contacto@pablosbarber.com.uy\nHorario de atención:\nLunes a viernes: 09:00 - 19:00\nSábados: 09:00 - 14:00\nDomingos: cerrados.\nUbicación: Salto, Uruguay.\nZona horaria: America/Montevideo\n\nMENSAJE DE BIENVENIDA\nEn el primer mensaje saludá siempre así:\n\"Hola, soy Mateo de Pablo's Barber. ¿Qué necesitás?\"\n\nCATÁLOGO DE SERVICIOS\n\nCorte clásico\nCorte a tijera o máquina según preferencia del cliente. Incluye lavado y secado.\nPrecio: $350 por sesión.\n\nCorte + barba\nCorte de cabello más arreglo y perfilado de barba. Navaja y acabado a cera.\nPrecio: $550 por sesión.\n\nArreglo de barba\nPerfilado, recorte y acabado de barba con navaja. Sin corte de cabello.\nPrecio: $250 por sesión.\n\nAfeitado clásico con navaja\nAfeitado tradicional con toalla caliente, espuma artesanal y navaja. Experiencia premium.\nPrecio: $400 por sesión.\n\nCorte infantil\nCorte para niños hasta 12 años. Paciencia garantizada.\nPrecio: $280 por sesión.\n\nCorte + tratamiento capilar\nCorte más hidratación profunda o tratamiento anticaída según el caso del cliente.\nPrecio: $700 por sesión.\n\nDiseño de cejas\nPerfilado y definición de cejas con hilo o navaja.\nPrecio: $150 por sesión.\n\nCombo VIP\nCorte + barba + afeitado con navaja + tratamiento. El paquete completo.\nPrecio: $950 por sesión.\n\nHERRAMIENTAS DISPONIBLES\n\nGoogle Calendar\nVer Disponibilidad Calendar: Consultar huecos libres. Usarla SIEMPRE antes de ofrecer horarios. La herramienta devuelve únicamente los eventos que YA están ocupados. Si un horario NO aparece en esa lista, está LIBRE y podés ofrecerlo. Si devuelve pocos o ningún evento, hay mucha disponibilidad. NUNCA interpretes una lista vacía como falta de disponibilidad.\nCrear Cita Calendar: Crear nuevo evento. Guardá siempre el eventId. Formato título: \"[Servicio] - [Nombre cliente]\". Formato fecha/hora OBLIGATORIO: ISO 8601 con timezone de Montevideo, ejemplo: 2025-04-10T10:00:00-03:00\nActualizar Cita Calendar: Modificar cita existente. Requiere eventId — obtenelo siempre con \"Buscar Cita\" primero. NUNCA inventés el eventId.\nEliminar Cita Calendar: Cancelar cita. Requiere eventId — obtenelo siempre con \"Buscar Cita\" primero.\n\nGoogle Sheets\nBuscar Cliente: Verificar si el cliente ya está registrado. Busca por teléfono.\nRegistrar Cliente: Dar de alta cliente nuevo. Campos: nombre completo, teléfono.\nBuscar Cita: Encontrar citas del cliente y obtener el Event_ID_Google para modificar o cancelar.\nGuardar Cita: Registrar cita nueva. DESPUÉS de crear en Calendar. Incluir siempre el Event_ID_Google.\nActualizar Estado Cita: Cambiar estado: Confirmada / Modificada / Cancelada / Completada.\n\nFLUJOS DE TRABAJO\n\nAgendar turno\nPreguntar qué servicio necesita.\nPreguntar nombre y apellido de forma natural. Esperá la respuesta. Si da solo el nombre, preguntá el apellido antes de continuar.\nBuscar Cliente por teléfono. Si no existe: Registrar Cliente. Si existe: continuar.\nPreguntar día y hora preferida.\nVer Disponibilidad Calendar para ese día completo.\nMostrar TODOS los horarios libres dentro del horario de atención. No filtres — dejá que el cliente elija.\nConfirmar elección. Crear Cita Calendar (guardar eventId). Guardar Cita en Sheets (con eventId).\nConfirmar al cliente con fecha, hora y servicio.\n\nModificar turno\nBuscar Cita (obtener Event_ID_Google). Ver Disponibilidad Calendar. Mostrar horarios libres. Actualizar Cita Calendar. Actualizar Estado Cita a \"Modificada\". Confirmar al cliente.\n\nCancelar turno\nBuscar Cita (obtener Event_ID_Google). Eliminar Cita Calendar. Actualizar Estado Cita a \"Cancelada\". Confirmar al cliente. Ofrecer reagendar.\n\nConsultar turno agendado\nBuscar Cita por teléfono. Mostrar fecha, hora y servicio.\n\nINTERPRETACIÓN INTUITIVA\nInterpretar el lenguaje natural como lo haría una persona. Nunca pedirle al cliente que aclare algo obvio por contexto.\n\nHorarios: \"8\" o \"a las 8\" sin aclarar → 08:00. \"5 de la tarde\" → 17:00. \"mediodía\" → 12:00. \"temprano\" → desde 09:00. \"tarde\" → desde 14:00. \"a la noche\" → informar que el último turno es a las 19:00 y ofrecer ese.\nDías: \"el lunes\" sin aclarar → próximo lunes disponible. \"mañana\" → fecha de mañana. \"pasado\" → pasado mañana.\nServicios: mapear lo que dice el cliente al catálogo sin pedirle el nombre técnico. Ejemplos: \"cortarme el pelo\" → Corte clásico. \"arreglarme la barba\" → Arreglo de barba. \"corte y barba\" → Corte + barba. \"afeitarme\" → Afeitado clásico con navaja. \"todo\" → Combo VIP.\n\nRegla general: Si el significado es claro por contexto, interpretalo y avanzá. Solo preguntá cuando haya ambigüedad real.\n\nREGLAS DE NEGOCIO\n\nAgenda\nAntelación mínima: 1 hora desde ahora.\nAntelación máxima: 30 días.\nHorario válido: 09:00 a 19:00 lunes a viernes. 09:00 a 14:00 sábados.\nSin turnos domingos ni feriados uruguayos.\n\nValidaciones\nSIEMPRE verificar disponibilidad ANTES de ofrecer horarios.\nNUNCA inventar huecos disponibles.\nNUNCA asumir que un día está lleno si la herramienta no devuelve eventos que lo confirmen.\nSIEMPRE guardar Event_ID_Google al crear citas.\nSIEMPRE buscar Event_ID_Google antes de modificar o cancelar.\nSIEMPRE confirmar datos antes de ejecutar acciones.\nSIEMPRE usar formato ISO 8601 con timezone -03:00 al crear o modificar eventos en Calendar.\nSi el cliente ya dio información antes, no se la volvás a pedir.\n\nFERIADOS URUGUAYOS (no agendar en estas fechas)\n1 de enero, 6 de enero, 1 de mayo, 18 de julio, 25 de agosto, 2 de noviembre, 25 de diciembre, 3 de abril (Viernes Santo).\n\nPrecios\nNo negociés precios por WhatsApp. Si el cliente pide descuento, escalá a humano.\nPodés mencionar los precios del catálogo como referencia.\nTodos los precios están en pesos uruguayos ($).\n\nCOMUNICACIÓN\nSin emojis.\nMáximo 3 o 4 líneas por respuesta.\nDirecto, con buena onda y carisma — como alguien del equipo, no un bot.\nNunca uses \"¡Por supuesto!\", \"¡Claro que sí!\" o \"¡Perfecto!\"\nCuando mostrés horarios disponibles, presentalos en lista corta y preguntá cuál le viene bien.\n\nEjemplos de respuestas correctas\n\nPrimer mensaje:\nHola, soy Mateo de Pablo's Barber. ¿Qué necesitás?\n\nCliente pregunta precio:\nEl corte clásico sale $350. Si querés barba también, el combo te sale $550. ¿Agendamos?\n\nCliente da solo el nombre:\n¿Y tu apellido?\n\nCliente dice \"el jueves por la tarde\":\nEl jueves por la tarde tengo libre: 14:00, 15:00, 16:00 y 18:00. ¿Cuál te queda bien?\n\nCliente pide un horario específico libre:\nEl jueves a las 16:00 está disponible. ¿Confirmamos?\n\nConfirmación de turno:\nListo. Jueves 10 de abril a las 16:00, corte + barba. Cualquier cambio avisame por acá.\n\nSin disponibilidad en ese horario:\nEse horario no está. Los que tengo libres ese día: 10:00, 11:00 y 17:00. ¿Alguno te sirve?\n\nCUÁNDO ESCALAR A HUMANO\n- El cliente pide hablar con una persona.\n- Pide descuento o condiciones especiales.\n- Hay una queja o reclamo.\n- Consulta que no podés responder con certeza.\n\nSeguí EXACTAMENTE estos pasos:\n1. Respondé al cliente: \"Te conecto con Pablo ahora mismo. En breve te contacta.\"\n2. Como última línea escribí ÚNICAMENTE: ESCALAR_HUMANO\n3. No hagas nada más. Terminá ahí.\n\nNOTIFICACIONES AL DUEÑO\nCuando confirmes un turno nuevo: última línea CITA_CONFIRMADA\nCuando canceles un turno: última línea CITA_CANCELADA\nCuando modifiques/reagendes un turno existente: última línea CITA_MODIFICADA\nEstas señales van solas en la última línea, sin texto adicional.\n\nIDENTIFICACIÓN DEL CLIENTE\nEl número de teléfono del cliente es: {{ $('Preparar Datos').item.json.phoneNumber }}\nEste número ya viene con el código de país +598 (Uruguay) incluido. Usalo tal cual para buscar al cliente con la herramienta Buscar Cliente. NUNCA le pidas el código de país al cliente.\n\nSECUENCIA DE OPERACIONES\nCREAR CITA — seguí OBLIGATORIAMENTE este orden sin saltear ningún paso:\n1. Ver Disponibilidad Calendar\n2. Confirmar horario con el cliente\n3. Crear Cita Calendar (guardar eventId)\n4. Guardar Cita en Sheets (con eventId) — ESTE PASO ES OBLIGATORIO\n5. Confirmar al cliente y escribir CITA_CONFIRMADA\nNUNCA confirmes una cita sin haber ejecutado Crear Cita Calendar Y Guardar Cita en Sheets primero.\nSi algún paso falla, avisale al cliente que hubo un problema y escalá a humano.\n\nMODIFICAR CITA: Buscar Cita (obtener eventId) → Actualizar Cita Calendar → Actualizar Estado Cita → Confirmar\nCANCELAR CITA: Buscar Cita (obtener eventId) → Eliminar Cita Calendar → Actualizar Estado Cita → Confirmar\nFechas en español 24hs: \"Jueves 10 de abril a las 16:00\"\nFecha y hora actual: {{ $now.setZone('America/Montevideo').toFormat('cccc d MMMM yyyy, HH:mm') }} (zona horaria Montevideo)",
+          "maxIterations": 8
+        }
+      },
+      "id": "3f22a666-8996-43e2-b806-1c153e2fbe64",
+      "name": "Recepcionista Virtual",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        4544,
+        3184
+      ],
+      "onError": "continueRegularOutput",
+      "notes": "FIX v2: maxIterations=8 para evitar loops infinitos si una tool falla. Configurar timeout de ejecución a 60s en Settings del workflow."
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {
+          "maxTokens": 2048,
+          "temperature": 0.3
+        }
+      },
+      "id": "527bc4d9-bb0f-4662-adf6-6e8867126744",
+      "name": "OpenAI GPT-4o",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        3808,
+        3376
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "Jy2rbzCOAB1kYxGw",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {
+          "maxTokens": 512,
+          "temperature": 0.4
+        }
+      },
+      "id": "abaa8c4a-a3fb-46f5-a817-fd63114f9b96",
+      "name": "OpenAI GPT-4o-mini (Guardrails)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        3536,
+        3488
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "Jy2rbzCOAB1kYxGw",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Preparar Datos').item.json.phoneNumber }}",
+        "contextWindowLength": 10
+      },
+      "id": "08109e16-9b1f-473b-a014-db684b1e4a16",
+      "name": "Postgres Chat Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        4176,
+        3456
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "pm9ACTe0ilQIuLuT",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Razoná paso a paso antes de ejecutar cualquier acción. Verificá que tenés todos los datos necesarios, que el orden de operaciones es correcto (Calendar antes que Sheets al crear, Sheets antes que Calendar al modificar/cancelar) y que no estás inventando ningún ID."
+      },
+      "id": "3b70c93a-c0cf-4aa3-9f5f-40a59296e0b0",
+      "name": "Think",
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        5600,
+        3904
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Comprobar disponibilidad consultando eventos de Google Calendar para un rango de fechas. SIEMPRE pasar el día completo: timeMin = día a las 00:00:00-03:00 y timeMax = mismo día a las 23:59:59-03:00. Formato obligatorio ISO 8601 con timezone Montevideo. Ejemplo para el 12 de mayo 2026: After=2026-05-12T00:00:00-03:00 Before=2026-05-12T23:59:59-03:00. Los eventos retornados son los horarios OCUPADOS. Los horarios no presentes están LIBRES.",
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "impulsaia59@gmail.com",
+          "mode": "list",
+          "cachedResultName": "impulsaia59@gmail.com"
+        },
+        "limit": "={{ 50 }}",
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', 'Inicio del rango de búsqueda en formato ISO 8601 con timezone Montevideo (-03:00). Para consultar un día completo usar 00:00:00. Ejemplo: 2026-05-12T00:00:00-03:00', 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', 'Fin del rango de búsqueda en formato ISO 8601 con timezone Montevideo (-03:00). Para consultar un día completo usar 23:59:59. Ejemplo: 2026-05-12T23:59:59-03:00', 'string') }}",
+        "options": {}
+      },
+      "id": "94778ad2-69fd-4834-ada4-8590cdca9e64",
+      "name": "Ver Disponibilidad Calendar",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        3296,
+        4368
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "9njivMCRHTCIByRU",
+          "name": "Google Calendar account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Crea un nuevo evento en Google Calendar cuando el cliente confirma una cita. IMPORTANTE: el eventId que devuelve esta herramienta DEBE guardarse inmediatamente usando Guardar Cita en Google Sheets.",
+        "calendar": {
+          "__rl": true,
+          "value": "impulsaia59@gmail.com",
+          "mode": "list",
+          "cachedResultName": "impulsaia59@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "=CITA-{{ $fromAI('nombre_cliente', ``, 'string') }}"
+        }
+      },
+      "id": "9a9fb257-eccd-4c81-aab1-a12dbd4634cb",
+      "name": "Crear Cita Calendar",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        3696,
+        4224
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "9njivMCRHTCIByRU",
+          "name": "Google Calendar account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Actualiza un evento en google calendar cuando un cliente pida que modifiquemos la hora de la cita. Haz uso del google event ID para localizar cual es el evento a modificar.",
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "impulsaia59@gmail.com",
+          "mode": "list",
+          "cachedResultName": "impulsaia59@gmail.com"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "updateFields": {
+          "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+          "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}"
+        }
+      },
+      "id": "6dee62d5-9f04-4f14-8275-4cb470cbb08d",
+      "name": "Actualizar Cita Calendar",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        3856,
+        4224
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "9njivMCRHTCIByRU",
+          "name": "Google Calendar account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Utiliza esta herramienta para eliminar un evento de google calendar cuando el cliente avise de que no quiere la cita.",
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "impulsaia59@gmail.com",
+          "mode": "list",
+          "cachedResultName": "impulsaia59@gmail.com"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "76771709-c9a4-4077-a6d1-5e7e63976c35",
+      "name": "Eliminar Cita Calendar",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        4064,
+        4224
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "9njivMCRHTCIByRU",
+          "name": "Google Calendar account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Get row(s) in sheet in Google Sheets",
+        "documentId": {
+          "__rl": true,
+          "value": "1dISfczRNjtOs-oTe4PyZn60jaf7rxtz3RZWEw4Ik0Xc",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 500424158,
+          "mode": "list",
+          "cachedResultName": "Clientes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dISfczRNjtOs-oTe4PyZn60jaf7rxtz3RZWEw4Ik0Xc/edit#gid=500424158"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Teléfono",
+              "lookupValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('values0_Value', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "16354acf-43a0-49c4-bdb4-73938f9d8435",
+      "name": "Buscar Cliente",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        4256,
+        4320
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Mgsveglz5qCH5P14",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Registra un nuevo cliente en la base de datos. Usá esta herramienta SOLO si Buscar Cliente no encontró al cliente. Requiere nombre completo y teléfono.",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1dISfczRNjtOs-oTe4PyZn60jaf7rxtz3RZWEw4Ik0Xc",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 500424158,
+          "mode": "list",
+          "cachedResultName": "Clientes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dISfczRNjtOs-oTe4PyZn60jaf7rxtz3RZWEw4Ik0Xc/edit#gid=500424158"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Nombre": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Nombre', `Nombre completo del cliente`, 'string') }}",
+            "Notas": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Notas', `Notas adicionales (opcional)`, 'string') }}",
+            "Teléfono": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Telefono', `Teléfono del cliente con código de país`, 'string') }}",
+            "ID_Cliente": "={{ 'CLIENTE-' + Date.now() }}",
+            "Email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Email', ``, 'string') }}",
+            "Fecha_Nacimiento": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fecha_Nacimiento', ``, 'string') }}",
+            "Fecha_Ultima_Visita": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fecha_Ultima_Visita', ``, 'string') }}",
+            "Servicio_Habitual": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Servicio_Habitual', ``, 'string') }}",
+            "Estado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Estado', ``, 'string') }}",
+            "Apellido": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Apellido', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID_Cliente",
+              "displayName": "ID_Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Apellido",
+              "displayName": "Apellido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Teléfono",
+              "displayName": "Teléfono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha_Nacimiento",
+              "displayName": "Fecha_Nacimiento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha_Ultima_Visita",
+              "displayName": "Fecha_Ultima_Visita",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Servicio_Habitual",
+              "displayName": "Servicio_Habitual",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Notas",
+              "displayName": "Notas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "cad3a8dc-b697-4902-817e-639aa9d383b0",
+      "name": "Registrar Cliente",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        4832,
+        4624
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Mgsveglz5qCH5P14",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Busca citas de un paciente por su teléfono. IMPORTANTE: Devuelve el Event_ID_Google que necesitas para modificar o cancelar citas en Google Calendar.",
+        "documentId": {
+          "__rl": true,
+          "value": "1dISfczRNjtOs-oTe4PyZn60jaf7rxtz3RZWEw4Ik0Xc",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 350216264,
+          "mode": "list",
+          "cachedResultName": "Citas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dISfczRNjtOs-oTe4PyZn60jaf7rxtz3RZWEw4Ik0Xc/edit#gid=350216264"
+        },
+        "options": {}
+      },
+      "id": "25e05345-b370-4ddd-b007-1a69b6141901",
+      "name": "Buscar Cita",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        4464,
+        4400
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Mgsveglz5qCH5P14",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Guarda una nueva cita en la base de datos de Google Sheets. OBLIGATORIO: Usá esta herramienta SIEMPRE después de crear el evento en Google Calendar. Sin este paso la cita NO queda registrada. Requiere el Event_ID_Google que devuelve Crear Cita Calendar.",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1dISfczRNjtOs-oTe4PyZn60jaf7rxtz3RZWEw4Ik0Xc",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 350216264,
+          "mode": "list",
+          "cachedResultName": "Citas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dISfczRNjtOs-oTe4PyZn60jaf7rxtz3RZWEw4Ik0Xc/edit#gid=350216264"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID_Cita": "={{ 'CITA-' + Date.now() }}",
+            "Nombre_Cliente": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Nombre_Cliente', `Nombre completo del cliente`, 'string') }}",
+            "Teléfono": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Tel_fono', `Teléfono del cliente con código de país`, 'string') }}",
+            "Fecha_Cita": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fecha_Cita', `Fecha de la cita DD/MM/YYYY`, 'string') }}",
+            "Hora_Cita": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Hora_Cita', `Hora de la cita HH:MM`, 'string') }}",
+            "Servicio": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Servicio', ``, 'string') }}",
+            "Recordatorio_24h *AUTO*": "FALSE",
+            "Recordatorio_1h *AUTO*": "FALSE",
+            "Estado": "Pendiente",
+            "Event_ID_Google": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID_Google', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Event_ID_Google"
+          ],
+          "schema": [
+            {
+              "id": "ID_Cita",
+              "displayName": "ID_Cita",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Event_ID_Google",
+              "displayName": "Event_ID_Google",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nombre_Cliente",
+              "displayName": "Nombre_Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Teléfono",
+              "displayName": "Teléfono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha_Cita",
+              "displayName": "Fecha_Cita",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Hora_Cita",
+              "displayName": "Hora_Cita",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Servicio",
+              "displayName": "Servicio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Recordatorio_24h *AUTO*",
+              "displayName": "Recordatorio_24h *AUTO*",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Recordatorio_1h *AUTO*",
+              "displayName": "Recordatorio_1h *AUTO*",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "420abab2-dd11-4ad4-bcc7-b4fa188bcda2",
+      "name": "Guardar Cita",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        4560,
+        4640
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Mgsveglz5qCH5P14",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Actualiza el estado de una cita (Confirmada, Modificada, Cancelada, Completada). Usá DESPUÉS de modificar o eliminar el evento en Google Calendar. El matching se hace por Event_ID_Google para asegurarse de modificar la cita correcta.",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1dISfczRNjtOs-oTe4PyZn60jaf7rxtz3RZWEw4Ik0Xc",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 350216264,
+          "mode": "list",
+          "cachedResultName": "Citas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dISfczRNjtOs-oTe4PyZn60jaf7rxtz3RZWEw4Ik0Xc/edit#gid=350216264"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID_Cita": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('ID_Cita', ``, 'string') }}",
+            "Nombre_Cliente": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Nombre_Cliente', ``, 'string') }}",
+            "Teléfono": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Tel_fono', ``, 'string') }}",
+            "Fecha_Cita": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Fecha_Cita', ``, 'string') }}",
+            "Hora_Cita": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Hora_Cita', ``, 'string') }}",
+            "Servicio": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Servicio', ``, 'string') }}",
+            "Estado": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Estado', ``, 'string') }}",
+            "Recordatorio_24h *AUTO*": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Recordatorio_24h__AUTO_', ``, 'string') }}",
+            "Recordatorio_1h *AUTO*": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Recordatorio_1h__AUTO_', ``, 'string') }}",
+            "Event_ID_Google": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID_Google__using_to_match_', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Event_ID_Google"
+          ],
+          "schema": [
+            {
+              "id": "ID_Cita",
+              "displayName": "ID_Cita",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Event_ID_Google",
+              "displayName": "Event_ID_Google",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Nombre_Cliente",
+              "displayName": "Nombre_Cliente",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Teléfono",
+              "displayName": "Teléfono",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Fecha_Cita",
+              "displayName": "Fecha_Cita",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Hora_Cita",
+              "displayName": "Hora_Cita",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Servicio",
+              "displayName": "Servicio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Recordatorio_24h *AUTO*",
+              "displayName": "Recordatorio_24h *AUTO*",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Recordatorio_1h *AUTO*",
+              "displayName": "Recordatorio_1h *AUTO*",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "52af0908-1b25-4624-9d16-542ea688d4f7",
+      "name": "Actualizar Estado Cita",
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        5104,
+        4352
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Mgsveglz5qCH5P14",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Envía un email al equipo de Impulsa para escalar la conversación a un humano. Usá esta herramienta SOLO cuando vayas a escribir ESCALAR_HUMANO en tu respuesta.",
+        "sendTo": "impulsaia59@gmail.com",
+        "subject": "=Escalado WhatsApp - Impulsa Lautaro",
+        "emailType": "text",
+        "message": "=ESCALADO DE CONVERSACIÓN WHATSAPP\n\nCliente: {{ $('Preparar Datos').item.json.pushName }}\nTeléfono: {{ $('Preparar Datos').item.json.phoneNumber }}\nFecha/Hora: {{ $now.toFormat('dd/MM/yyyy HH:mm') }}\n\nÚltimo mensaje del cliente:\n{{ $('Preparar Datos').item.json.chatInput }}\n\nPor favor, contactá al cliente lo antes posible.",
+        "options": {}
+      },
+      "id": "d90b65be-1222-4372-8dd4-de8940da3c0a",
+      "name": "Escalar a Humano",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        5552,
+        4336
+      ],
+      "webhookId": "fedce390-fc18-41b7-9a0c-d09e4712ff3d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "hrQpAhrX2JZg3BRt",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "escalar-check-001",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "ESCALAR_HUMANO",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a8738e43-82ed-4b22-be5c-b8fe6eb4975d",
+      "name": "Detectar Escalado",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4976,
+        3184
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─── LIMPIAR MENSAJE ESCALADO ──────────────────────────────────────────\n// FIX v2: fallback explícito si el agente no produce output\nconst rawOutput = $input.first().json.output;\n\nconst output = (rawOutput && rawOutput.trim().length > 0)\n  ? rawOutput\n  : 'Te conecto con alguien del equipo ahora mismo. En breve te contactan.';\n\nconst limpio = output\n  .replace(/ESCALAR_HUMANO/g, '')\n  .replace(/CITA_CONFIRMADA/g, '')\n  .replace(/CITA_CANCELADA/g, '')\n  .trim();\n\nconst preparar = $('Preparar Datos').first().json;\n\nreturn [{ json: {\n  mensajeLimpio: limpio.length > 0 ? limpio : 'Te conecto con alguien del equipo ahora mismo. En breve te contactan.',\n  phoneNumber: preparar.phoneNumber,\n  remoteJid: preparar.remoteJid,\n  instanceName: preparar.instanceName,\n  pushName: preparar.pushName,\n  chatInput: preparar.chatInput,\n  outputOriginal: rawOutput || ''\n} }];"
+      },
+      "id": "f8bf976b-8b42-45c1-8502-f54c8ef56394",
+      "name": "Limpiar Mensaje Escalado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5200,
+        2928
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $json.instanceName }}",
+        "remoteJid": "={{ $json.remoteJid }}",
+        "messageText": "={{ $json.mensajeLimpio }}",
+        "options_message": {}
+      },
+      "id": "66eaabe8-8699-46e8-b8fd-4b8c52d4b89a",
+      "name": "Avisar Cliente Escalado",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        5600,
+        2928
+      ],
+      "credentials": {
+        "evolutionApi": {
+          "id": "JT73vtD3mKsST7MJ",
+          "name": "Evolution account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Limpiar Mensaje Escalado').item.json.instanceName }}",
+        "remoteJid": "={{ env.OWNER_PHONE }}@s.whatsapp.net",
+        "messageText": "=🚨 *ESCALADO A HUMANO*\n\nCliente: {{ $('Limpiar Mensaje Escalado').item.json.pushName || 'Sin nombre' }}\nTeléfono: {{ $('Limpiar Mensaje Escalado').item.json.phoneNumber || 'Sin teléfono' }}\nFecha: {{ $now.toFormat('dd/MM/yyyy HH:mm') }}\n\n*Motivo del escalado:*\n{{ $('Limpiar Mensaje Escalado').item.json.chatInput || 'Sin mensaje' }}",
+        "options_message": {}
+      },
+      "id": "87e017b5-e1d7-4159-8e0a-1f5c4fa61418",
+      "name": "Notificar Dueño - Escalado",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        5840,
+        2928
+      ],
+      "credentials": {
+        "evolutionApi": {
+          "id": "JT73vtD3mKsST7MJ",
+          "name": "Evolution account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─── LIMPIAR OUTPUT NORMAL ─────────────────────────────────────────────\n// FIX v2: fallback explícito si el agente no produce output (ej: fallo de tool)\nconst rawOutput = $input.first().json.output;\n\n// Si el agente falló silenciosamente, output puede ser undefined/null/vacío\nconst output = (rawOutput && rawOutput.trim().length > 0)\n  ? rawOutput\n  : 'Disculpá, tuve un problema técnico justo ahora. ¿Podés repetir tu mensaje?';\n\nconst limpio = output\n  .replace(/CITA_CONFIRMADA/g, '')\n  .replace(/CITA_CANCELADA/g, '')\n  .replace(/CITA_MODIFICADA/g, '')\n  .replace(/ESCALAR_HUMANO/g, '')\n  .trim();\n\nconst preparar = $('Preparar Datos').first().json;\n\nreturn [{\n  json: {\n    ...($input.first().json),\n    outputLimpio: limpio.length > 0 ? limpio : 'Disculpá, tuve un problema técnico. ¿Podés repetir tu mensaje?',\n    instanceName: preparar.instanceName,\n    remoteJid: preparar.remoteJid,\n    pushName: preparar.pushName,\n    phoneNumber: preparar.phoneNumber,\n    outputOriginal: rawOutput || ''\n  }\n}];"
+      },
+      "id": "fde5b840-0967-43d7-8f95-3503f3c46b51",
+      "name": "Limpiar Output Normal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5360,
+        3296
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $json.instanceName }}",
+        "remoteJid": "={{ $json.remoteJid }}",
+        "messageText": "={{ $json.outputLimpio }}",
+        "options_message": {}
+      },
+      "id": "cb6c6094-6905-4331-8754-774875741cab",
+      "name": "Enviar texto",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        5680,
+        3296
+      ],
+      "credentials": {
+        "evolutionApi": {
+          "id": "JT73vtD3mKsST7MJ",
+          "name": "Evolution account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-confirm-1",
+              "leftValue": "={{ $('Recepcionista Virtual').item.json.output }}",
+              "rightValue": "CITA_CONFIRMADA",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "df09a8ce-0400-4c68-ac03-5dc041ef7978",
+      "name": "Detectar Cita Confirmada",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        5920,
+        3216
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-cancel-1",
+              "leftValue": "={{ $('Recepcionista Virtual').item.json.output }}",
+              "rightValue": "CITA_CANCELADA",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "edc11f21-364f-42b9-910a-50ee38df8477",
+      "name": "Detectar Cita Cancelada",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        5920,
+        3376
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Preparar Datos').item.json.instanceName }}",
+        "remoteJid": "={{ $env.OWNER_PHONE }}@s.whatsapp.net",
+        "messageText": "=✅ *NUEVA CITA AGENDADA*\n\nCliente: {{ $('Preparar Datos').item.json.pushName }}\nTeléfono: {{ $('Preparar Datos').item.json.phoneNumber }}\nFecha/Hora: {{ (() => { const o = $('Recepcionista Virtual').item.json.output; const dias = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo']; const m = o.match(new RegExp('(' + dias.join('|') + ')[^.\\n]*', 'i')); return m ? m[0] : 'Ver calendario'; })() }}\nRegistrado: {{ $now.toFormat('dd/MM/yyyy HH:mm') }}",
+        "options_message": {}
+      },
+      "id": "ea5eabdd-d16d-47ba-9e7b-1e4c3eacee94",
+      "name": "Notificar Cita Confirmada",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        6160,
+        3216
+      ],
+      "credentials": {
+        "evolutionApi": {
+          "id": "JT73vtD3mKsST7MJ",
+          "name": "Evolution account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Preparar Datos').item.json.instanceName }}",
+        "remoteJid": "={{ $env.OWNER_PHONE }}@s.whatsapp.net",
+        "messageText": "=❌ *CITA CANCELADA*\n\nCliente: {{ $('Preparar Datos').item.json.pushName }}\nTeléfono: {{ $('Preparar Datos').item.json.phoneNumber }}\nFecha/Hora: {{ (() => { const o = $('Recepcionista Virtual').item.json.output; const dias = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo']; const m = o.match(new RegExp('(' + dias.join('|') + ')[^.\\n]*', 'i')); return m ? m[0] : 'Ver calendario'; })() }}\nCancelado: {{ $now.toFormat('dd/MM/yyyy HH:mm') }}",
+        "options_message": {}
+      },
+      "id": "4679b3ba-224f-40e3-b807-2ac0054cecea",
+      "name": "Notificar Cita Cancelada",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        6160,
+        3472
+      ],
+      "credentials": {
+        "evolutionApi": {
+          "id": "JT73vtD3mKsST7MJ",
+          "name": "Evolution account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-modificada-1",
+              "leftValue": "={{ $('Recepcionista Virtual').item.json.output }}",
+              "rightValue": "CITA_MODIFICADA",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c9edc037-ac23-4bec-adbd-48c27bd9194b",
+      "name": "Detectar Cita Modificada",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        5920,
+        3536
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('Preparar Datos').item.json.instanceName }}",
+        "remoteJid": "={{ $env.OWNER_PHONE }}@s.whatsapp.net",
+        "messageText": "=🔄 *CITA REAGENDADA*\n\nCliente: {{ $('Preparar Datos').item.json.pushName }}\nTeléfono: {{ $('Preparar Datos').item.json.phoneNumber }}\nFecha/Hora nueva: {{ (() => { const o = $('Recepcionista Virtual').item.json.output; const dias = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo']; const m = o.match(new RegExp('(' + dias.join('|') + ')[^.\\n]*', 'i')); return m ? m[0] : 'Ver calendario'; })() }}\nRegistrado: {{ $now.toFormat('dd/MM/yyyy HH:mm') }}",
+        "options_message": {}
+      },
+      "id": "45d429c8-74a5-47a8-86d0-cc7f45f73a12",
+      "name": "Notificar Cita Modificada",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        6160,
+        3536
+      ],
+      "credentials": {
+        "evolutionApi": {
+          "id": "JT73vtD3mKsST7MJ",
+          "name": "Evolution account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Evolution API": {
+      "main": [
+        [
+          {
+            "node": "Solo Chats Privados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Solo Chats Privados": {
+      "main": [
+        [
+          {
+            "node": "Filtro fromMe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtro fromMe": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Tipo de Mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tipo de Mensaje": {
+      "main": [
+        [
+          {
+            "node": "Preparar Datos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar Datos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Obtener Media Base64",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Aviso Tipo No Soportado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Media Base64": {
+      "main": [
+        [
+          {
+            "node": "Convertir Audio a Binario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convertir Audio a Binario": {
+      "main": [
+        [
+          {
+            "node": "Transcribir con Whisper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribir con Whisper": {
+      "main": [
+        [
+          {
+            "node": "Preparar Datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Datos": {
+      "main": [
+        [
+          {
+            "node": "Recepcionista Virtual",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardrails": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Rechazar Mensaje NSFW",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI GPT-4o": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Recepcionista Virtual",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI GPT-4o-mini (Guardrails)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Guardrails",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Recepcionista Virtual",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Recepcionista Virtual",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ver Disponibilidad Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "Recepcionista Virtual",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear Cita Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "Recepcionista Virtual",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar Cita Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "Recepcionista Virtual",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Eliminar Cita Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "Recepcionista Virtual",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Cliente": {
+      "ai_tool": [
+        [
+          {
+            "node": "Recepcionista Virtual",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Cliente": {
+      "ai_tool": [
+        [
+          {
+            "node": "Recepcionista Virtual",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Cita": {
+      "ai_tool": [
+        [
+          {
+            "node": "Recepcionista Virtual",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar Cita": {
+      "ai_tool": [
+        [
+          {
+            "node": "Recepcionista Virtual",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar Estado Cita": {
+      "ai_tool": [
+        [
+          {
+            "node": "Recepcionista Virtual",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Escalar a Humano": {
+      "ai_tool": [
+        [
+          {
+            "node": "Recepcionista Virtual",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recepcionista Virtual": {
+      "main": [
+        [
+          {
+            "node": "Detectar Escalado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detectar Escalado": {
+      "main": [
+        [
+          {
+            "node": "Limpiar Mensaje Escalado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Limpiar Output Normal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpiar Mensaje Escalado": {
+      "main": [
+        [
+          {
+            "node": "Avisar Cliente Escalado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avisar Cliente Escalado": {
+      "main": [
+        [
+          {
+            "node": "Notificar Dueño - Escalado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpiar Output Normal": {
+      "main": [
+        [
+          {
+            "node": "Enviar texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar texto": {
+      "main": [
+        [
+          {
+            "node": "Detectar Cita Confirmada",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Detectar Cita Cancelada",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Detectar Cita Modificada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detectar Cita Confirmada": {
+      "main": [
+        [
+          {
+            "node": "Notificar Cita Confirmada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detectar Cita Cancelada": {
+      "main": [
+        [
+          {
+            "node": "Notificar Cita Cancelada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detectar Cita Modificada": {
+      "main": [
+        [
+          {
+            "node": "Notificar Cita Modificada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "America/Montevideo",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "executionTimeout": -1
+  },
+  "versionId": "31033c64-d222-4cff-b602-9e4829b98a32",
+  "meta": {
+    "instanceId": "6b58e1f7d972217748e27a047b455e783e3492c695779983d50360e735db16d9"
+  },
+  "id": "NmOGfKXNzdC2jVwP",
+  "tags": []
+}
